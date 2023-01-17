@@ -17,7 +17,7 @@ def get_log_groups():
         client = boto3.client('logs', aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key,
                               region_name=region_name)
-
+        
         # describing the log groups
         current_app.logger.info("Describing the log groups")
         response = client.describe_log_groups(
@@ -42,15 +42,16 @@ def get_log_streams():
 
         start_time = request.json.get('start_time')
         end_time = request.json.get('end_time')
-
         start_time_miliseconds = convert_to_miliseconds(start_time)
         end_time_miliseconds = convert_to_miliseconds(end_time)
-
+        
         response = client.filter_log_events(
             logGroupName='/aws/rds/instance/database-1/slowquery',
             startTime=start_time_miliseconds,
             endTime=end_time_miliseconds,
         )
+
         return jsonify(response)
+
     except Exception as e:
         return {"Error": str(e)}
