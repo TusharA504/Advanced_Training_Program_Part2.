@@ -1,12 +1,8 @@
-from flask import jsonify, request, current_app
-import boto3
-import json
-from ..settings import aws_secret_access_key, aws_access_key_id, region_name
-from botocore.exceptions import ClientError, WaiterError
 from http import HTTPStatus
-import logging
-from datetime import datetime
+import boto3
+from flask import jsonify, request, current_app
 from .service import convert_to_miliseconds, find_query_count
+from ..settings import aws_secret_access_key, aws_access_key_id
 
 
 def get_log_groups():
@@ -20,26 +16,23 @@ def get_log_groups():
         client = boto3.client('logs', aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key,
                               region_name=region)
-        
+
         # describing the log groups
         current_app.logger.info("Describing the log groups")
         response = client.describe_log_groups(
             logGroupNamePrefix=f'/aws/rds/instance/{db_name}',
         )
-        
 
-        logGroups = [logGroup['logGroupName'] for logGroup in response['logGroups']]
-
-            
+        log_groups = [logGroup['logGroupName'] for logGroup in response['logGroups']]
 
         # sending response
         current_app.logger.info("Sending Response")
-        return jsonify({"logGroups":logGroups}), HTTPStatus.OK
-    
-    # exception handeling
+        return jsonify({"logGroups": log_groups}), HTTPStatus.OK
+
+    # exception handling
     except Exception as e:
         current_app.logger.error(str(e))
-        return {"Error":str(e)}, HTTPStatus.BAD_REQUEST
+        return {"Error": str(e)}, HTTPStatus.BAD_REQUEST
 
 
 # function to Find the log streams within given time window
@@ -47,45 +40,43 @@ def get_log_streams():
     try:
         # request object parameter
         region = request.json.get('region')
-        logGroupName = request.json.get('logGroupName')
+        log_group_name = request.json.get('logGroupName')
         filter_pattern = request.json.get('filterPattern')
         start_time = request.json.get('start_time')
         end_time = request.json.get('end_time')
         start_time_miliseconds = convert_to_miliseconds(start_time)
         end_time_miliseconds = convert_to_miliseconds(end_time)
-        
-        # time validation
-        if end_time<start_time:
-            raise Exception("end time must be greater than start time")
 
+        # time validation
+        if end_time < start_time:
+            raise Exception("end time must be greater than start time")
 
         # Creating Client
         current_app.logger.info("Creating client")
         client = boto3.client('logs', aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key,
                               region_name=region)
-        
-       
+
         # calling filter log events method
         current_app.logger.info("Calling filter_log_events method")
         response = client.filter_log_events(
-            logGroupName=logGroupName,
+            logGroupName=log_group_name,
             startTime=start_time_miliseconds,
             endTime=end_time_miliseconds,
             filterPattern=filter_pattern
         )
-        
+
         events = response['events']
-        logGroupType = logGroupName.split('/')[-1]
-     
-        # counting quries
+        log_group_type = log_group_name.split('/')[-1]
+
+        # counting queries
         current_app.logger.info("Calling find_query_count method")
-        queryCount = find_query_count(logGroupType,events)
+        query_count = find_query_count(log_group_type, events)
 
         # sending response
-        return jsonify(queryCount)
-    
-    # exception handeling
+        return jsonify(query_count)
+
+    # exception handling
     except Exception as e:
         current_app.logger.error(str(e))
         return {"Error": str(e)}
