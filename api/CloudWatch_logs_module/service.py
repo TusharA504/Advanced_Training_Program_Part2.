@@ -8,6 +8,16 @@ def convert_to_miliseconds(Time):
     return time_in_miliseconds
 
 
+
+def describe_log_groups(client,db_name):
+    response = client.describe_log_groups(
+        logGroupNamePrefix=f'/aws/rds/instance/{db_name}'
+
+    )
+    logGroups = [logGroup['logGroupName']
+                 for logGroup in response['logGroups']]
+    return logGroups
+
 def find_query_count(logGroupType,events):
     queries = {"TOTAL_QUERIES":0}
     for event in events:
