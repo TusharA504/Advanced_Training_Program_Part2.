@@ -19,6 +19,7 @@ def describe_log_groups(client,db_name):
                  for logGroup in response['logGroups']]
     return logGroups
 
+
 def find_query_count(logGroupType,events):
     queries = {"TOTAL_QUERIES":0}
     for event in events:

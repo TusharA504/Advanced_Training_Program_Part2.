@@ -26,8 +26,10 @@ def get_log_groups():
                               region_name=region)
 
         # describing the log groups
+        
         current_app.logger.info("Describing the log groups")
         logGroups=describe_log_groups(client, db_name)
+        
         # response = client.describe_log_groups(
         #     logGroupNamePrefix=f'/aws/rds/instance/{db_name}'
           
@@ -84,16 +86,22 @@ def get_log_streams():
                               aws_secret_access_key=aws_secret_access_key,
                               region_name=region)
         
-        
+        # calling describe_log_groups method
+        current_app.logger.info("Calling describe_log_groups method")
         logGroups= describe_log_groups(client,db_name)
 
         quries_of_log_groups={}
         for group in logGroups:
+
+            # Calling describe_log_streams method
+            current_app.logger.info("Calling describe_log_streams method")
             streams = client.describe_log_streams(
                 logGroupName=group,
                 
             )
-
+            
+            # Calling filter_log_events method
+            current_app.logger.info("Calling filter_log_events method")
             response= client.filter_log_events(
                 logGroupName=group,
                 logStreamNames=[stream["logStreamName"]for stream in streams["logStreams"]],
@@ -101,16 +109,21 @@ def get_log_streams():
                 endTime=end_time_miliseconds,
                 filterPattern=filter_pattern
             )
-          
+            
+            # Accessing events
             events = response['events']
+
+            # Getting log group type
             logGroupType = group.split('/')[-1]
             
+            # Counting queries
             queryCount = find_query_count(logGroupType, events)
             db_queries = f"{group.split('/')[-2]} ({group.split('/')[-1]})"
             
             quries_of_log_groups[db_queries] = queryCount
 
-        
+        # Sending response
+        current_app.logger.info("Sending response")
         return jsonify(quries_of_log_groups)
 
         # calling filter log events method
