@@ -1,3 +1,5 @@
+from http import HTTPStatus
+import boto3
 from flask import jsonify, request, current_app
 import boto3
 import json
@@ -22,7 +24,7 @@ def get_log_groups():
         client = boto3.client('logs', aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key,
                               region_name=region)
-        
+
         # describing the log groups
         current_app.logger.info("Describing the log groups")
         logGroups=describe_log_groups(client, db_name)
@@ -57,7 +59,7 @@ def get_log_groups():
     # exception handeling
     except Exception as e:
         current_app.logger.error(str(e))
-        return {"Error":str(e)}, HTTPStatus.BAD_REQUEST
+        return {"Error": str(e)}, HTTPStatus.BAD_REQUEST
 
 
 # function to Find the log streams within given time window
@@ -71,11 +73,10 @@ def get_log_streams():
         end_time = request.json.get('end_time')
         start_time_miliseconds = convert_to_miliseconds(start_time)
         end_time_miliseconds = convert_to_miliseconds(end_time)
-        
-        # time validation
-        if end_time<start_time:
-            raise Exception("end time must be greater than start time")
 
+        # time validation
+        if end_time < start_time:
+            raise Exception("end time must be greater than start time")
 
         # Creating Client
         current_app.logger.info("Creating client")

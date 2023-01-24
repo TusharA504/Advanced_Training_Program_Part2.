@@ -1,7 +1,8 @@
-from datetime import datetime,timezone
+from datetime import datetime
 
-def convert_to_miliseconds(Time):
-    end_time = Time
+
+def convert_to_miliseconds(time):
+    end_time = time
     datetime_format = '%d/%m/%Y %H:%M:%S.%f'
     formatted_time = datetime.strptime(end_time, datetime_format)
     time_in_miliseconds = int(formatted_time.timestamp())*1000
@@ -25,11 +26,11 @@ def find_query_count(logGroupType,events):
             new = event['message'].split('\n')[-1]
             query = new.split()[0]
             if query.upper() in queries.keys():
-                queries[query.upper()]+=1
-                queries['TOTAL_QUERIES']+=1
+                queries[query.upper()] += 1
+                queries['TOTAL_QUERIES'] += 1
             elif query.isalpha():
                 queries[query.upper()] = 1
-                queries['TOTAL_QUERIES']+=1
+                queries['TOTAL_QUERIES'] += 1
             # return event['message']
         elif logGroupType == "general":
             new = event['message'].split()
@@ -39,11 +40,11 @@ def find_query_count(logGroupType,events):
             # new[query_index+1] 
             # if query_index else ""
             if query.upper() in queries.keys():
-                queries[query.upper()]+=1
-                queries['TOTAL_QUERIES']+=1
+                queries[query.upper()] += 1
+                queries['TOTAL_QUERIES'] += 1
             elif query.isalpha():
                 queries[query.upper()] = 1
-                queries['TOTAL_QUERIES']+=1
+                queries['TOTAL_QUERIES'] += 1
             # return events 
  
     return queries
