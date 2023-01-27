@@ -26,13 +26,12 @@ def describe_log_groups(client,db_name):
 
     response = client.describe_log_groups(
         logGroupNamePrefix=f'/aws/rds/instance/{db_name}'
-
     )
+    
     if not response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK:
         raise Exception("Unexpeted Error")
     
-    logGroups = [logGroup['logGroupName']
-                 for logGroup in response['logGroups']]
+    logGroups = [logGroup['logGroupName']for logGroup in response['logGroups']]
     
     return logGroups
 
