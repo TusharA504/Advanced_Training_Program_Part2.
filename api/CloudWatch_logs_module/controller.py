@@ -14,14 +14,14 @@ def get_log_groups():
         db_name = request.json.get("db_name")
         region = request.json.get('region')
         
-        # validation for region
-        current_app.logger.info(f"Validating Region: '{region}'")
-        Validations.validate_region(region,region_name,EC2_RESOURCE)
-       
-     
-        # validation for db_name
-        current_app.logger.info(f"Validating Database Name: '{db_name}'")
-        Validations.validate_db_name(RDS_RESOURCE,db_name, region)
+        # Validating Inputs
+        current_app.logger.info("Validating Inputs...")
+        Validations.validate_input_log_groups(
+            region=region,
+            default_region=region_name,
+            db_name=db_name
+        )
+        current_app.logger.info("Input Validation Successful"+ u'\u2705')
 
         # creating a client
         current_app.logger.info(f"Creating client: '{region}'")
@@ -31,63 +31,46 @@ def get_log_groups():
         current_app.logger.info("Describing the log groups")
         logGroups = describe_log_groups(client, db_name)
 
-        # paginator = client.get_paginator('describe_log_groups')
-
-        # response_iterator = paginator.paginate(
-        #     logGroupNamePrefix=f'/aws/rds/instance/{db_name}',
-        #     PaginationConfig={
-        #         'MaxItems': 1,
-        #         'PageSize': 5,
-        #         'StartingToken': response["nextToken"]
-        #     }
-        # )
-
-        # arr=[]
-        # for groups in response_iterator:
-        #     arr.append(groups)
-
-        # sending response
         current_app.logger.info("Sending Response")
         return jsonify({"logGroups": logGroups}), HTTPStatus.OK
 
-    # exception handeling
-    except ClientError as e:
-        current_app.logger.error(e.response['Error'])
-        return {"error": e.response['Error']}, e.response['ResponseMetadata']['HTTPStatusCode']
+    except ValidationError as validaterror:
+        error = validaterror.response['Error']
+        status_code = validaterror.response['Status Code']
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
 
-    except Exception as e:
-        
-        current_app.logger.error(str(e))
-        return {"Error": str(e)}, HTTPStatus.BAD_REQUEST
+    except Exception as error:
+        current_app.logger.error(str(error))
+        error = str(error)
+        status_code = HTTPStatus.BAD_REQUEST
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
 
 
-# function to Find the log streams within given time window
-def get_log_streams():
+# function to Find the log streams and query count within given time window
+def get_query_count():
     try:
         # request object parameter
         current_app.logger.info(f"Got Request For Get Log Streams: {request.json}")
         region = request.json.get('region')
         db_name = request.json.get('db_name')
-        filter_pattern = request.json.get('filterPattern')
+        # filter_pattern = request.json.get('filterPattern')
         start_time = request.json.get('start_time')
         end_time = request.json.get('end_time')
+
+        # Validating Inputs
+        current_app.logger.info("Validating Inputs...")
+        Validations.validate_input_query_count(
+            db_name=db_name,
+            region=region,
+            default_region=region_name,
+            start_time=start_time,
+            end_time=end_time
+        )
+        current_app.logger.info("Input Validation Successful"+ u'\u2705')
+
+        # Converting Start-End time to miliseconds
         start_time_miliseconds = convert_to_miliseconds(start_time)
         end_time_miliseconds = convert_to_miliseconds(end_time)
-
-        # validation for region
-        current_app.logger.info(f"Validating Region: '{region}'")
-        Validations.validate_region(region, region_name, EC2_RESOURCE)
-        
-        # validation for db name
-        current_app.logger.info(f"Validating Database Name: '{db_name}'")
-        Validations.validate_db_name(RDS_RESOURCE, db_name, region)
-        
-        # time validation
-        current_app.logger.info(f"Validating time: '{start_time,end_time}'")
-        if end_time < start_time:
-            raise Exception("end time must be greater than start time")
-        
-        current_app.logger.info(f"Validated time: '{start_time,end_time}'")
 
         # Creating Client
         current_app.logger.info(f"Creating client for {LOGS_RESOURCE} resource ")
@@ -106,6 +89,10 @@ def get_log_streams():
 
             )
 
+            # Getting log group type
+            logGroupType = group.split('/')[-1]
+            filter_pattern = request.json.get('filterPattern') if logGroupType=='general' else ''
+
             # Calling filter_log_events method
             current_app.logger.info("Calling filter_log_events method")
             response = client.filter_log_events(
@@ -119,9 +106,6 @@ def get_log_streams():
             # Accessing events
             events = response['events']
 
-            # Getting log group type
-            logGroupType = group.split('/')[-1]
-
             # Counting queries
             queryCount = find_query_count(logGroupType, events)
             db_queries = f"{group.split('/')[-2]} ({group.split('/')[-1]})"
@@ -132,26 +116,14 @@ def get_log_streams():
         current_app.logger.info("Sending response")
         return jsonify(quries_of_log_groups)
 
-        # calling filter log events method
-        # current_app.logger.info("Calling filter_log_events method")
-        # response = client.filter_log_events(
-        #     logGroupName=logGroupName,
-        #     startTime=start_time_miliseconds,
-        #     endTime=end_time_miliseconds,
-        #     filterPattern=filter_pattern
-        # )
-
-        # events = response['events']
-        # logGroupType = logGroupName.split('/')[-1]
-
-        # # counting quries
-        # current_app.logger.info("Calling find_query_count method")
-        # queryCount = find_query_count(logGroupType,events)
-
-        # # sending response
-        # return jsonify(response)
 
     # exception handeling
+    except ValidationError as validaterror:
+        error = validaterror.response['Error']
+        status_code = validaterror.response['Status Code']
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+
+
     except Exception as e:
         current_app.logger.error(str(e))
         return {"Error": str(e)}
