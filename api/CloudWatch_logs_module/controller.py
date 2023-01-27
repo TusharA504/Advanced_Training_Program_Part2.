@@ -70,7 +70,7 @@ def get_log_streams():
         # request object parameter
         region = request.json.get('region')
         db_name=request.json.get('db_name')
-        filter_pattern = request.json.get('filterPattern')
+        # filter_pattern = request.json.get('filterPattern')
         start_time = request.json.get('start_time')
         end_time = request.json.get('end_time')
         start_time_miliseconds = convert_to_miliseconds(start_time)
@@ -100,6 +100,10 @@ def get_log_streams():
                 
             )
             
+            # Getting log group type
+            logGroupType = group.split('/')[-1]
+            filter_pattern = "" if logGroupType == "slowquery" else request.json.get('filterPattern')
+
             # Calling filter_log_events method
             current_app.logger.info("Calling filter_log_events method")
             response= client.filter_log_events(
@@ -113,8 +117,6 @@ def get_log_streams():
             # Accessing events
             events = response['events']
 
-            # Getting log group type
-            logGroupType = group.split('/')[-1]
             
             # Counting queries
             queryCount = find_query_count(logGroupType, events)
