@@ -3,9 +3,9 @@ from flask import jsonify, request, current_app
 import json
 from botocore.exceptions import ClientError
 from .service import *
-from .constant import *
+from ..constant import *
 from ..settings import region_name
-from ..utils import ERROR_RESPONSE, SUCCESS_RESPONSE
+from ..utils import *
 
 
 def get_log_groups_async():
@@ -26,22 +26,23 @@ def get_log_groups_async():
 
         # sending message
         current_app.logger.info("Sending Message")
-        response=send_message_to_trigger_lambda(region, request.json,GET_LOG_GROUPS)
+        response=send_message_to_trigger_lambda(region, request.json, QUEUE_URL)
         
         # Sending Response
-        current_app.logger.info("Sending Response")
-        return response
 
+        current_app.logger.info("Sending Response")
+        return SUCCESS_RESPONSE(MESSAGE_SENT, HTTPStatus.OK)
+    
     except ValidationError as validaterror:
         error = validaterror.response['Error']
         status_code = validaterror.response['Status Code']
-        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=MESSAGE_NOT_SENT)
 
     except Exception as error:
         current_app.logger.error(str(error))
         error = str(error)
         status_code = HTTPStatus.BAD_REQUEST
-        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=MESSAGE_NOT_SENT)
 
 
 # function to Find the log streams and query count within given time window

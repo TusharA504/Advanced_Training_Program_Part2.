@@ -3,9 +3,9 @@ from flask import jsonify, request, current_app
 import json
 from botocore.exceptions import ClientError
 from .service import *
-from .constant import *
+from ..constant import *
 from ..settings import region_name
-from ..utils import ERROR_RESPONSE, SUCCESS_RESPONSE
+from ..utils import *
 
 
 def get_log_groups():
