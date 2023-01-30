@@ -26,7 +26,7 @@ def get_log_groups_async():
 
         # sending message
         current_app.logger.info("Sending Message")
-        response=send_message_to_trigger_lambda(region, request.json, QUEUE_URL)
+        response=send_message_to_trigger_lambda(region, json.dumps(request.json), QUEUE_URL)
         
         # Sending Response
 

@@ -16,12 +16,15 @@ def get_random_number():
 
 def send_message_to_trigger_lambda(region,message,url):
         client=create_client(SQS_RESOURCE, region)
+        print(message)
         response = client.send_message(
             QueueUrl=url,
-            MessageBody=str(message),
+            MessageBody=message,
             MessageDeduplicationId=get_random_number(),
             MessageGroupId=get_random_number()
         )
+
+       
         return response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK
     
         
