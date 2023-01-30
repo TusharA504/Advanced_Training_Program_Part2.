@@ -6,6 +6,7 @@ from http import HTTPStatus
 from .constant import *
 from botocore.exceptions import ClientError
 from flask import current_app
+import random
 
 # Class that inherits Exception and has attribute as response
 class ValidationError(Exception):
@@ -17,6 +18,30 @@ def create_client(resource,region):
                           aws_secret_access_key=aws_secret_access_key,
                           region_name=region)
     return client
+
+def get_random_number():
+    random_number = random.randint(10000, 99999)
+    return str(random_number)
+
+def send_message_to_trigger_lambda(region,message,url):
+    print(type(message))
+
+    try:
+        client=create_client(SQS_RESOURCE, region)
+        response = client.send_message(
+            QueueUrl=url,
+            MessageBody=str(message),
+            MessageDeduplicationId=get_random_number(),
+            MessageGroupId=get_random_number()
+        )
+        if response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK:
+            return SUCCESS_RESPONSE(MESSAGE_SENT,HTTPStatus.OK)
+    
+    except Exception as e:
+        return {"Error":str(e)},HTTPStatus.BAD_REQUEST
+    
+
+    
 
 
 def convert_to_miliseconds(time):
@@ -32,13 +57,12 @@ def describe_log_groups(client,db_name):
 
     response = client.describe_log_groups(
         logGroupNamePrefix=f'/aws/rds/instance/{db_name}'
-
     )
+    
     if not response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK:
         raise Exception("Unexpeted Error")
     
-    logGroups = [logGroup['logGroupName']
-                 for logGroup in response['logGroups']]
+    logGroups = [logGroup['logGroupName']for logGroup in response['logGroups']]
     
     return logGroups
 
@@ -147,7 +171,7 @@ class Validations():
 
     def validate_input_log_groups(region,default_region,db_name):
         Validations.validate_region(region,default_region,EC2_RESOURCE)
-        Validations.validate_db_name(RDS_RESOURCE,db_name,region)
+        # Validations.validate_db_name(RDS_RESOURCE,db_name,region)
 
     def validate_input_query_count(db_name, region, default_region, start_time, end_time):
         Validations.validate_region(region,default_region,EC2_RESOURCE)

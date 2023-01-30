@@ -1,9 +1,9 @@
 from flask import jsonify
 
 # resources
-LOGS_RESOURCE = 'logs'
-RDS_RESOURCE = 'rds'
-EC2_RESOURCE = 'ec2'
+LOGS_RESOURCE='logs'
+RDS_RESOURCE='rds'
+EC2_RESOURCE='ec2'
 
 # optinstatus message
 
@@ -21,13 +21,11 @@ INVALID_DATE_TIME_WINDOW = "Invalid DateTime Window. Start time cannot be greate
 
 DATE_TIME_FORMAT = r"[0-3]?[0-9]/[0-1]?[0-9]/((19([7-9]?[0-9]))|20([0-9]?[0-9])) ([0-2]?[0-9]):([0-6]?[0-9]):([0-6]?[0-9]).([0-9][0-9][0-9][0-9])"
 
-
-def ERROR_RESPONSE(ERROR, STATUSCODE):
-    errorResponse = {"Error": ERROR}
-    return jsonify(errorResponse), STATUSCODE
-
+def ERROR_RESPONSE(ERROR,STATUSCODE):
+    errorResponse = {"Error":ERROR}
+    return jsonify(errorResponse),STATUSCODE
 
 def SUCCESS_RESPONSE(MSG, STATUSCODE):
     successResponse = {"Message": MSG}
     return jsonify(successResponse), STATUSCODE
-    
+
