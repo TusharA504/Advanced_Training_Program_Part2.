@@ -3,15 +3,11 @@ import re
 import boto3
 from ..settings import aws_secret_access_key, aws_access_key_id,region_name
 from http import HTTPStatus
-from .constant import *
+from ..constant import *
 from botocore.exceptions import ClientError
 from flask import current_app
 import random
 from ..utils import create_client
-
-
-
-
 
 
 def get_random_number():
@@ -19,7 +15,6 @@ def get_random_number():
     return str(random_number)
 
 def send_message_to_trigger_lambda(region,message,url):
-    try:
         client=create_client(SQS_RESOURCE, region)
         response = client.send_message(
             QueueUrl=url,
@@ -28,8 +23,8 @@ def send_message_to_trigger_lambda(region,message,url):
             MessageGroupId=get_random_number()
         )
         return response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK
-    except:
-        raise Exception(str(response))    
+    
+        
        
     
 
