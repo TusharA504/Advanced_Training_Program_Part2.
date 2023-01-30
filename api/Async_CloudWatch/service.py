@@ -24,8 +24,6 @@ def get_random_number():
     return str(random_number)
 
 def send_message_to_trigger_lambda(region,message,url):
-    print(type(message))
-
     try:
         client=create_client(SQS_RESOURCE, region)
         response = client.send_message(
@@ -36,14 +34,15 @@ def send_message_to_trigger_lambda(region,message,url):
         )
         if response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK:
             return SUCCESS_RESPONSE(MESSAGE_SENT,HTTPStatus.OK)
+        else:
+            return ERROR_RESPONSE(ERROR=UNEXPECTED_ERROR, STATUSCODE=HTTPStatus.BAD_REQUEST)
     
     except Exception as e:
-        return {"Error":str(e)},HTTPStatus.BAD_REQUEST
+        return ERROR_RESPONSE(ERROR=str(e),STATUSCODE=HTTPStatus.BAD_REQUEST)
+       
     
 
     
-
-
 def convert_to_miliseconds(time):
     end_time = time
     datetime_format = '%d/%m/%Y %H:%M:%S.%f'
@@ -171,7 +170,7 @@ class Validations():
 
     def validate_input_log_groups(region,default_region,db_name):
         Validations.validate_region(region,default_region,EC2_RESOURCE)
-        # Validations.validate_db_name(RDS_RESOURCE,db_name,region)
+        Validations.validate_db_name(RDS_RESOURCE,db_name,region)
 
     def validate_input_query_count(db_name, region, default_region, start_time, end_time):
         Validations.validate_region(region,default_region,EC2_RESOURCE)

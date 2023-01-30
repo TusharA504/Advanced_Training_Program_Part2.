@@ -23,14 +23,13 @@ def get_log_groups_async():
         )
         current_app.logger.info("Input Validation Successful"+ u'\u2705')
 
-        
-
-        # describing the log groups
-        current_app.logger.info("Describing the log groups")
+        # sending message
+        current_app.logger.info("Sending Message")
         response=send_message_to_trigger_lambda(region, request.json,GET_LOG_GROUPS)
         
+        # Sending Response
         current_app.logger.info("Sending Response")
-        return str(response), HTTPStatus.OK
+        return response
 
     except ValidationError as validaterror:
         error = validaterror.response['Error']
