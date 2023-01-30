@@ -23,16 +23,14 @@ def get_log_groups():
         )
         current_app.logger.info("Input Validation Successful"+ u'\u2705')
 
-        # creating a client
-        current_app.logger.info(f"Creating client: '{region}'")
-        client = create_client(LOGS_RESOURCE, region)
+        
 
         # describing the log groups
         current_app.logger.info("Describing the log groups")
-        logGroups = describe_log_groups(client, db_name)
-
+        response=send_message_to_trigger_lambda(region, str(request.json),GET_LOG_GROUPS)
+        
         current_app.logger.info("Sending Response")
-        return jsonify({"logGroups": logGroups}), HTTPStatus.OK
+        return jsonify({response}), HTTPStatus.OK
 
     except ValidationError as validaterror:
         error = validaterror.response['Error']

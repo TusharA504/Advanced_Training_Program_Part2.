@@ -4,11 +4,19 @@ from flask import jsonify
 LOGS_RESOURCE='logs'
 RDS_RESOURCE='rds'
 EC2_RESOURCE='ec2'
+SQS_RESOURCE='sqs'
 
 # optinstatus message
 
 OPT_IN_NOT_REQUIRED = 'opt-in-not-required'
 OPTED_IN = 'opted-in'
+
+# que_url
+
+GET_LOG_GROUPS= "https://queue.amazonaws.com/962020710349/Lambda_trigger.fifo"
+
+get_log_streams=""
+
 
 # messages
 

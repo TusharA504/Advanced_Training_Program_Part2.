@@ -6,6 +6,7 @@ from http import HTTPStatus
 from .constant import *
 from botocore.exceptions import ClientError
 from flask import current_app
+import random
 
 # Class that inherits Exception and has attribute as response
 class ValidationError(Exception):
@@ -17,6 +18,24 @@ def create_client(resource,region):
                           aws_secret_access_key=aws_secret_access_key,
                           region_name=region)
     return client
+
+def get_random_number():
+    random_number = random.randint(10000, 99999)
+    return str(random_number)
+
+def send_message_to_trigger_lambda(region,message,url):
+    client=create_client(SQS_RESOURCE, region)
+    response = client.send_message(
+        QueueUrl=url,
+        MessageBody=message,
+        MessageDeduplicationId=get_random_number(),
+        MessageGroupId=get_random_number()
+    )
+   
+    return response
+    
+
+    
 
 
 def convert_to_miliseconds(time):
@@ -146,7 +165,7 @@ class Validations():
 
     def validate_input_log_groups(region,default_region,db_name):
         Validations.validate_region(region,default_region,EC2_RESOURCE)
-        Validations.validate_db_name(RDS_RESOURCE,db_name,region)
+        # Validations.validate_db_name(RDS_RESOURCE,db_name,region)
 
     def validate_input_query_count(db_name, region, default_region, start_time, end_time):
         Validations.validate_region(region,default_region,EC2_RESOURCE)
