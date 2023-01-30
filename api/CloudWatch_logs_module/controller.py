@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 from .service import *
 from .constant import *
 from ..settings import region_name
+from ..utils import ERROR_RESPONSE, SUCCESS_RESPONSE
 
 
 def get_log_groups():
@@ -33,18 +34,18 @@ def get_log_groups():
         logGroups = describe_log_groups(client, db_name)
 
         current_app.logger.info("Sending Response")
-        return jsonify({"logGroups": logGroups}), HTTPStatus.OK
+        return SUCCESS_RESPONSE(logGroups,HTTPStatus.OK)
 
     except ValidationError as validaterror:
         error = validaterror.response['Error']
         status_code = validaterror.response['Status Code']
-        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=LOG_GROUP_NOT_FOUND)
 
     except Exception as error:
         current_app.logger.error(str(error))
         error = str(error)
         status_code = HTTPStatus.BAD_REQUEST
-        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=LOG_GROUP_NOT_FOUND)
 
 
 # function to Find the log streams and query count within given time window
@@ -83,13 +84,12 @@ def get_query_count():
         current_app.logger.info("Calling describe_log_groups method")
         logGroups = describe_log_groups(client, db_name)
 
-        quries_of_log_groups = {}
+        queries_of_log_groups = {}
         for group in logGroups:
             # Calling describe_log_streams method
             current_app.logger.info("Calling describe_log_streams method")
             streams = client.describe_log_streams(
                 logGroupName=group,
-
             )
 
             # Getting log group type
@@ -115,18 +115,20 @@ def get_query_count():
             queryCount = find_query_count(logGroupType, events)
             db_queries = f"{group.split('/')[-2]} ({group.split('/')[-1]})"
 
-            quries_of_log_groups[db_queries] = queryCount
+            queries_of_log_groups[db_queries] = queryCount
 
         # Sending response
         current_app.logger.info("Sending response")
-        return jsonify(quries_of_log_groups)
+        return SUCCESS_RESPONSE(queries_of_log_groups,HTTPStatus.OK)
 
     # exception handeling
     except ValidationError as validaterror:
         error = validaterror.response['Error']
         status_code = validaterror.response['Status Code']
-        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=QUERIES_NOT_FOUND)
 
-    except Exception as e:
-        current_app.logger.error(str(e))
-        return {"Error": str(e)}
+    except Exception as error:
+        current_app.logger.error(str(error))
+        error = str(error)
+        status_code = HTTPStatus.BAD_REQUEST
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=QUERIES_NOT_FOUND)
