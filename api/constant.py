@@ -13,7 +13,10 @@ OPTED_IN = 'opted-in'
 
 # que_url
 
-QUEUE_URL = "https://queue.amazonaws.com/962020710349/Lambda_trigger.fifo"
+QUEUE_URL = {
+    'Log_groups':"https://queue.amazonaws.com/962020710349/Lambda_trigger.fifo",
+    'Queries':"https://queue.amazonaws.com/962020710349/Lambda_trigger.fifo"
+    }
 
 
 # messages
