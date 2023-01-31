@@ -14,30 +14,28 @@ def get_random_number():
     random_number = random.randint(10000, 99999)
     return str(random_number)
 
-def send_message_to_trigger_lambda(region,message,url):
-        client=create_client(SQS_RESOURCE, region)
-        print(message)
-        response = client.send_message(
-            QueueUrl=url,
-            MessageBody="Hello World",
-            MessageDeduplicationId=get_random_number(),
-            MessageGroupId=get_random_number(),
-            MessageAttributes={
-                'db_name': {
-                    'StringValue':message['db_name'] ,
-                    
-                    'DataType':'String'
-                },
-                'region': {
-                    'StringValue': region,
-
-                    'DataType': 'String'
-                }
+def extract_message_attributes(message):
+    message_attributes = {}
+    for i in message:
+        message_attributes[i]={
+            "StringValue":message[i],
+            "Datatype":"String"
             }
-        )
+    return message_attributes
 
-       
-        return response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK
+def send_message_to_trigger_lambda(region,request_body,url):
+    message_attributes = extract_message_attributes(request_body)
+    client=create_client(SQS_RESOURCE, region)
+    # print(message)
+    response = client.send_message(
+        QueueUrl=url,
+        MessageBody="Hello World",
+        MessageDeduplicationId=get_random_number(),
+        MessageGroupId=get_random_number(),
+        MessageAttributes=message_attributes
+    )
+
+    return response['ResponseMetadata']['HTTPStatusCode']==HTTPStatus.OK
     
         
        
