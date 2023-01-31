@@ -15,7 +15,7 @@ OPTED_IN = 'opted-in'
 
 QUEUE_URL = {
     'Log_groups':"https://queue.amazonaws.com/962020710349/Lambda_trigger.fifo",
-    'Queries':"https://queue.amazonaws.com/962020710349/Lambda_trigger.fifo"
+    'Queries': "https://queue.amazonaws.com/962020710349/get_log_streams.fifo"
     }
 
 
@@ -26,7 +26,7 @@ INVALID_DBNAME = "DB name '{db_name}' was not found. DB does not exists or exist
 INVALID_DATETIME_FORMAT = "Invaild date time format. Please enter the datetime in this format: dd/mm/yyyy HH:MM:SS.0000"
 INVALID_ENDTIME = "The entered end time is ahead of current time. Please enter end datetime before {current_time}."
 INVALID_DATE_TIME_WINDOW = "Invalid DateTime Window. Start time cannot be greater than end time."
-MESSAGE_SENT="Message was sent successfully"
+MESSAGE_SENT="Message was sent successfully. You can find the output in CloudWatch Logs"
 MESSAGE_NOT_SENT="An error occured while sending the message"
 
 DATE_TIME_FORMAT = r"[0-3]?[0-9]/[0-1]?[0-9]/((19([7-9]?[0-9]))|20([0-9]?[0-9])) ([0-2]?[0-9]):([0-6]?[0-9]):([0-6]?[0-9]).([0-9][0-9][0-9][0-9])"

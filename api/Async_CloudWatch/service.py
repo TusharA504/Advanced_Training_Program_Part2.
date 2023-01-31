@@ -18,15 +18,15 @@ def extract_message_attributes(message):
     message_attributes = {}
     for i in message:
         message_attributes[i]={
-            "StringValue":message[i],
-            "Datatype":"String"
+            "StringValue":str(message[i]),
+            "DataType":"String"
             }
     return message_attributes
 
 def send_message_to_trigger_lambda(region,request_body,url):
     message_attributes = extract_message_attributes(request_body)
     client=create_client(SQS_RESOURCE, region)
-    # print(message)
+
     response = client.send_message(
         QueueUrl=url,
         MessageBody="Hello World",

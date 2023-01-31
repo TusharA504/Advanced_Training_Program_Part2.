@@ -31,16 +31,18 @@ def get_log_groups_async():
         
         # Sending Response
         current_app.logger.info("Sending Response")
-        return SUCCESS_RESPONSE(MESSAGE_SENT, HTTPStatus.OK)
-    
+        if response:
+            return SUCCESS_RESPONSE(MESSAGE_SENT, HTTPStatus.OK)
+        raise Exception("Unexpected Error Occured")
+
     except ValidationError as validaterror:
         error = validaterror.response['Error']
         status_code = validaterror.response['Status Code']
         return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=MESSAGE_NOT_SENT)
 
     except Exception as error:
-        current_app.logger.error(str(error))
         error = str(error)
+        current_app.logger.error(error)
         status_code = HTTPStatus.BAD_REQUEST
         return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=MESSAGE_NOT_SENT)
 
@@ -76,14 +78,21 @@ def get_query_count_async():
         current_app.logger.info("Sending Message")
         response=send_message_to_trigger_lambda(region, request_body, QUEUE_URL['Queries'])
 
+        # Sending Response
+        current_app.logger.info("Sending Response")
+        if response:
+            return SUCCESS_RESPONSE(MESSAGE_SENT, HTTPStatus.OK)
+        raise Exception("Unexpected Error Occured")
 
     # exception handeling
     except ValidationError as validaterror:
         error = validaterror.response['Error']
         status_code = validaterror.response['Status Code']
-        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code)
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code,MSG=MESSAGE_NOT_SENT)
 
 
-    except Exception as e:
-        current_app.logger.error(str(e))
-        return {"Error": str(e)}
+    except Exception as error:
+        error = str(error)
+        current_app.logger.error(error)
+        status_code = HTTPStatus.BAD_REQUEST
+        return ERROR_RESPONSE(ERROR=error, STATUSCODE=status_code, MSG=MESSAGE_NOT_SENT)
