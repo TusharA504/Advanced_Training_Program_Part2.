@@ -19,9 +19,21 @@ def send_message_to_trigger_lambda(region,message,url):
         print(message)
         response = client.send_message(
             QueueUrl=url,
-            MessageBody=message,
+            MessageBody="Hello World",
             MessageDeduplicationId=get_random_number(),
-            MessageGroupId=get_random_number()
+            MessageGroupId=get_random_number(),
+            MessageAttributes={
+                'db_name': {
+                    'StringValue':message['db_name'] ,
+                    
+                    'DataType':'String'
+                },
+                'region': {
+                    'StringValue': region,
+
+                    'DataType': 'String'
+                }
+            }
         )
 
        
