@@ -7,6 +7,9 @@ name = "pypi"
 flask = "*"
 boto3 = "*"
 python-dotenv = "*"
+flask-sqlalchemy = "*"
+pymysql = "*"
+flask-cors = "*"
 
 [dev-packages]
 

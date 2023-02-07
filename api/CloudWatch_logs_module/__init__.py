@@ -14,3 +14,5 @@ cloudwatch_log_bp.add_url_rule(
 # for get log-streams
 cloudwatch_log_bp.add_url_rule(
     '/queries', 'get_query_count', get_query_count, methods=['GET'])
+
+

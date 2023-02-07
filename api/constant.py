@@ -28,6 +28,7 @@ INVALID_ENDTIME = "The entered end time is ahead of current time. Please enter e
 INVALID_DATE_TIME_WINDOW = "Invalid DateTime Window. Start time cannot be greater than end time."
 MESSAGE_SENT="Message was sent successfully. You can find the output in CloudWatch Logs"
 MESSAGE_NOT_SENT="An error occured while sending the message"
+QUERIES_NOT_FOUND = "An error occuring while searching for queries"
+LOG_GROUP_NOT_FOUND = "Unable to find log groups."
 
 DATE_TIME_FORMAT = r"[0-3]?[0-9]/[0-1]?[0-9]/((19([7-9]?[0-9]))|20([0-9]?[0-9])) ([0-2]?[0-9]):([0-6]?[0-9]):([0-6]?[0-9]).([0-9][0-9][0-9][0-9])"
-

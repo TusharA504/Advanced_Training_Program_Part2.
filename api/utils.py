@@ -7,16 +7,32 @@ from datetime import datetime
 from botocore.exceptions import ClientError
 from .constant import *
 
+def describe_db_instance(db_name,region):
+    rds_client = create_client(RDS_RESOURCE,region)
+    response = rds_client.describe_db_instances(DBInstanceIdentifier=db_name)
+    return response
+
 def create_client(resource, region):
     client = boto3.client(resource, aws_access_key_id=aws_access_key_id,
                           aws_secret_access_key=aws_secret_access_key,
                           region_name=region)
     return client
 
+def get_regions_list():
+    resource=EC2_RESOURCE
+    default_region=region_name
+    ec2_client = create_client(resource, default_region)
+    response = ec2_client.describe_regions(AllRegions=True)
+    return response
+
 
 
 # Class that inherits Exception and has attribute as response
 class ValidationError(Exception):
+    def __init__(self, response):
+        self.response = response
+
+class DataBaseError(Exception):
     def __init__(self, response):
         self.response = response
 
@@ -40,13 +56,12 @@ class Validations():
 
     def validate_region(region, default_region, resource):
         current_app.logger.info(f"Validating region: '{region}'...")
-        # creating ec2 client
-        ec2_client = create_client(resource, default_region)
-        response = ec2_client.describe_regions(AllRegions=True)
+
+        regions_list = get_regions_list()
 
         # checks for valid enabled region
         is_region = False
-        for reg in response["Regions"]:
+        for reg in regions_list["Regions"]:
             if reg["RegionName"] == region:
                 is_region = True
                 if not (reg["OptInStatus"] == OPT_IN_NOT_REQUIRED or reg["OptInStatus"] == OPTED_IN):
@@ -94,7 +109,7 @@ class Validations():
 
     def validate_input_log_groups(region, default_region, db_name):
         Validations.validate_region(region, default_region, EC2_RESOURCE)
-        # Validations.validate_db_name(RDS_RESOURCE, db_name, region)
+        Validations.validate_db_name(RDS_RESOURCE, db_name, region)
 
     def validate_input_query_count(db_name, region, default_region, start_time, end_time):
         Validations.validate_region(region, default_region, EC2_RESOURCE)
@@ -112,6 +127,6 @@ def ERROR_RESPONSE(ERROR, STATUSCODE, MSG):
     return jsonify(errorResponse), STATUSCODE
 
 
-def SUCCESS_RESPONSE(CONTENT, STATUSCODE):
-    successResponse = {"Message": CONTENT}
+def SUCCESS_RESPONSE(CONTENT_NAME,CONTENT, STATUSCODE):
+    successResponse = {CONTENT_NAME: CONTENT}
     return jsonify(successResponse), STATUSCODE
