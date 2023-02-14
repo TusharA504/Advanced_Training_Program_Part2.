@@ -13,3 +13,4 @@ extras_bp.add_url_rule('/regionslist', 'get_region_list', get_region_list, metho
 extras_bp.add_url_rule('/dblist','get_db_list',get_db_list,methods=['POST'])
 
 extras_bp.add_url_rule('/getter','getter',getter,methods=['POST'])
+

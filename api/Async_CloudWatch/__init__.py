@@ -3,7 +3,7 @@ from .controller import *
 
 
 # creates a blueprint for rds instance
-async_cloudwatch_bp = Blueprint('rds', __name__, url_prefix='/api/async/cloudwatch/log')
+async_cloudwatch_bp = Blueprint('async_rds', __name__, url_prefix='/api/async/cloudwatch/log')
 
 
 # for get log-groups of rds instance

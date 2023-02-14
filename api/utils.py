@@ -6,6 +6,7 @@ from http import HTTPStatus
 from datetime import datetime
 from botocore.exceptions import ClientError
 from .constant import *
+import string
 
 def describe_db_instance(db_name,region):
     rds_client = create_client(RDS_RESOURCE,region)
@@ -38,7 +39,6 @@ class DataBaseError(Exception):
 
 
 class Validations():
-
     def validate_db_name(resource, db_name, region):
         current_app.logger.info(f"Validating Database Name: '{db_name}'...")
         # creating RDS Client
