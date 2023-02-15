@@ -62,56 +62,68 @@ class Validations():
 
         current_app.logger.info("Region Validation Successful " + u'\u2705')
 
-    def validate_datetime(date_time):
-        pattern = re.compile(DATE_TIME_FORMAT)
-        date_time = date_time
+    # def validate_datetime(date_time):
+    #     pattern = re.compile(DATE_TIME_FORMAT)
+    #     date_time = date_time
 
-        if not re.fullmatch(pattern, date_time):
-            error = INVALID_DATETIME_FORMAT
-            status_code = HTTPStatus.BAD_REQUEST
-            current_app.logger.info(error)
-            raise ValidationError({"Error": error, "Status Code": status_code})
+    #     if not re.fullmatch(pattern, date_time):
+    #         error = INVALID_DATETIME_FORMAT
+    #         status_code = HTTPStatus.BAD_REQUEST
+    #         current_app.logger.info(error)
+    #         raise ValidationError({"Error": error, "Status Code": status_code})
 
-    def validate_endtime(end_time):
-        date_time_format = '%d/%m/%Y %H:%M:%S'
+    def validate_time(time):
+        current_app.logger.info(f"Validating time: '{time}'...")
+        date_time_format = "%Y-%m-%dT%H:%M"
+        # '%d/%m/%Y %H:%M:%S'
         current_time = datetime.now()
-        end_time = datetime.strptime(end_time[:-5], date_time_format)
+        end_time = datetime.strptime(time, date_time_format)
+        
+      
         if end_time > current_time:
-            error = INVALID_ENDTIME.format(current_time=current_time)
+            error = INVALID_ENDTIME.format(
+                current_time=end_time.strftime("%Y-%m-%dT%H:%M"))
             status_code = HTTPStatus.BAD_REQUEST
             current_app.logger.info(error)
             raise ValidationError({"Error": error, "Status Code": status_code})
-
+        
+        current_app.logger.info(f"Validation Of Time {time} Successful " + u'\u2705')
+    
     def validate_start_end_datetime(start_time, end_time):
-        date_time_format = '%d/%m/%Y %H:%M:%S'
-        start_time = datetime.strptime(start_time[:-5], date_time_format)
-        end_time = datetime.strptime(end_time[:-5], date_time_format)
-        if end_time < start_time:
+
+        current_app.logger.info(f"Validating {start_time}<={end_time}...")
+        date_time_format = "%Y-%m-%dT%H:%M"
+        # '%d/%m/%Y %H:%M:%S'
+        start_time = datetime.strptime(start_time, date_time_format)
+        end_time = datetime.strptime(end_time, date_time_format)
+    
+     
+        if end_time <=start_time:
             error = INVALID_DATE_TIME_WINDOW
             status_code = HTTPStatus.BAD_REQUEST
             current_app.logger.info(error)
             raise ValidationError({"Error": error, "Status Code": status_code})
+        
+        current_app.logger.info(f"Validation For {start_time}<={end_time} Successful " + u'\u2705')
 
     def validate_input_log_groups(region, default_region, db_name):
         Validations.validate_region(region, default_region, EC2_RESOURCE)
-        # Validations.validate_db_name(RDS_RESOURCE, db_name, region)
+        Validations.validate_db_name(RDS_RESOURCE, db_name, region)
 
     def validate_input_query_count(db_name, region, default_region, start_time, end_time):
         Validations.validate_region(region, default_region, EC2_RESOURCE)
         Validations.validate_db_name(RDS_RESOURCE, db_name, region)
-        current_app.logger.info("Validating start-end datetime...")
-        Validations.validate_datetime(start_time)
-        Validations.validate_datetime(end_time)
-        Validations.validate_endtime(end_time)
+        Validations.validate_time(start_time)
+        Validations.validate_time(end_time)
         Validations.validate_start_end_datetime(start_time, end_time)
-        current_app.logger.info("Datetime Validation Successful " + u'\u2705')
+        
 
 
-def ERROR_RESPONSE(ERROR, STATUSCODE, MSG):
-    errorResponse = {"Error": ERROR, "Message": MSG}
+def ERROR_RESPONSE(ERROR, STATUSCODE):
+    errorResponse = {"Error": ERROR}
     return jsonify(errorResponse), STATUSCODE
 
 
-def SUCCESS_RESPONSE(CONTENT, STATUSCODE):
-    successResponse = {"Message": CONTENT}
+def SUCCESS_RESPONSE(DATA,CONTENT, STATUSCODE):
+    successResponse = {DATA: CONTENT}
     return jsonify(successResponse), STATUSCODE
