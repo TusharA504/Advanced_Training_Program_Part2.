@@ -37,8 +37,8 @@ def delete_logs_groups_if_not_present_at_aws(group,region):
 
 # for deleting log_streams from db
 def delete_log_streams_if_not_present_at_aws(stream):
-        db.session.query(Queries).filter( Queries.StreamId == stream[0].id).delete(synchronize_session=False)
-        db.session.query(Streams).filter(Streams.id == stream[0].id).delete(synchronize_session=False)
+        db.session.query(Queries).filter( Queries.StreamId == stream.id).delete(synchronize_session=False)
+        db.session.query(Streams).filter(Streams.id == stream.id).delete(synchronize_session=False)
         db.session.commit()
 
 
@@ -176,7 +176,7 @@ def db_streams_response_method(client,region,logGroups_from_aws):
         for stream in list_streams_from_db:
             if stream not in list_streams_from_aws:
                 stream_r = Streams.query.filter_by(LogGroupId=log_group[0].id, LogStreamName=stream, Region=region).all()
-                delete_log_streams_if_not_present_at_aws(stream_r)
+                delete_log_streams_if_not_present_at_aws(stream_r[0])
 
         for stream in list_streams_from_aws:
             if stream not in list_streams_from_db:

@@ -12,6 +12,7 @@ pymysql = "*"
 flask-cors = "*"
 pytest = "*"
 requests = "*"
+pytest-html = "*"
 
 [dev-packages]
 
