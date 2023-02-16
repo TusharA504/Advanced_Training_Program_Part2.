@@ -10,6 +10,7 @@ python-dotenv = "*"
 flask-sqlalchemy = "*"
 pymysql = "*"
 flask-cors = "*"
+pytest = "*"
 
 [dev-packages]
 
